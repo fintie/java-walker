@@ -1,0 +1,143 @@
+package walker.handler;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import walker.entity.Job;
+import walker.entity.Walker;
+import walker.service.Email;
+import walker.service.JobService;
+import walker.service.WalkerService;
+
+
+
+@Controller
+public class WalkerHandler {
+	
+	@Autowired
+	private WalkerService walkerService; 
+	@Autowired
+	private JobService jobService;
+	
+	@RequestMapping(value="client/{id}")
+	public String redirectClient(@PathVariable("id") Integer id, Map<String, Object> map){
+		map.put("walker", walkerService.getWalker(id));
+		return "client";
+	}
+	@RequestMapping(value="/getWalker", method=RequestMethod.GET)
+	public String getWalker(
+			@RequestParam(value = "username", required = false) String userName,
+			@RequestParam(value = "password", required = false) String password,
+			Map<String, Object> map) {
+		System.out.println("username:" + userName + "   passowrd:" + password);
+		Walker walker = walkerService.getWalker(userName, password);
+		if(walker == null){
+			return "login";
+		}
+		map.put("walker", walker);
+		if(walker.getRole().trim().toLowerCase().equals("admin")){
+			List<Job> jobs = jobService.getAll("Pending");
+			map.put("jobs", jobs);
+			return "admin";
+		}else if(walker.getRole().trim().toLowerCase().equals("client")){
+			return "client";
+		}else{
+			List<Job> jobs = jobService.getAll("Accepted");
+			List<Job> doingJobs = jobService.getJobByStatusAndWalker("Taken", walker);
+			List<Job> finishJobs = jobService.getJobByStatusAndWalker("Finish", walker);
+			map.put("finishJobs", finishJobs);
+			map.put("jobs", jobs);
+			map.put("doingJobs", doingJobs);			
+			return "walker";
+		}
+	}
+	@RequestMapping(value="/client/publish", method=RequestMethod.PUT)
+	public String publish(
+			@RequestParam(value = "name", required = false) String name,
+			@RequestParam(value = "description", required = false) String description,
+			@RequestParam(value = "id", required = false) Integer id,
+			Map<String, Object> map){
+		Job job = new Job();
+		Walker walker = walkerService.getWalker(id);
+		job.setCreateBy(walker.getUsername());
+		job.setCreateTime(new Date());
+		job.setDescription(description);
+		job.setStatus("Pending");
+		job.setName(name);
+		jobService.save(job);		
+		return "redirect:/client/" + walker.getId();
+	}
+	@RequestMapping(value = "/admin/accept/{id}", method=RequestMethod.POST)
+	public String accept(@PathVariable("id") Integer id, @RequestParam(value="wid") Integer wid){
+		if(jobService.getJob(id).getStatus().trim().toLowerCase().equals("pending")){
+			jobService.update("Accepted", id);
+			List<Walker> walkers = walkerService.getAll();
+			for(Walker w: walkers){
+				System.out.println(w.getEmail());
+				String link = "/walker/take/" + id; 
+				String description = jobService.getJob(id).getDescription();
+				new Email(w.getEmail(), link, description);
+			}
+		}
+		return "redirect:/admin/" + wid;
+	}
+
+	@RequestMapping(value = "/admin/{id}")
+	public String redirectAdmin(@PathVariable("id") Integer id, Map<String, Object> map){
+		List<Job> jobs = jobService.getAll("Pending");
+		map.put("jobs", jobs);
+		map.put("walker", walkerService.getWalker(id));
+		return "admin";
+	}
+	@RequestMapping(value="/register")
+	public String goToRegister(){
+		return "register";
+	}
+	@RequestMapping(value="/new")
+	public String registerNew(Walker walker){
+		walkerService.save(walker);
+		return "redirect:/getWalker";
+	}
+
+	@RequestMapping(value = "/walker/{id}")
+	public String redirectWalker(Map<String, Object> map, @PathVariable("id") Integer id){
+		List<Job> jobs = jobService.getAll("Accepted");
+		Walker walker = walkerService.getWalker(id);
+		List<Job> doingJobs = jobService.getJobByStatusAndWalker("Taken", walker);
+		List<Job> finishJobs = jobService.getJobByStatusAndWalker("Finish", walker);
+		map.put("finishJobs", finishJobs);
+		map.put("jobs", jobs);
+		map.put("doingJobs", doingJobs);
+		map.put("walker", walker);
+		return "walker";
+	}
+	
+	@RequestMapping(value ="/walker/take/{id}", method=RequestMethod.POST )
+	public String take(@PathVariable("id") Integer id, @RequestParam("wid") Integer wid){
+		Walker walker = walkerService.getWalker(wid);
+		if(jobService.getJob(id).getStatus().trim().toLowerCase().equals("accepted")){
+			jobService.taken("Taken", walker ,id);
+		}
+		return "redirect:/walker/" + wid;
+	}
+	
+	@RequestMapping(value ="/walker/finish/{id}", method=RequestMethod.POST )
+	public String finish(@PathVariable("id") Integer id, @RequestParam("wid") Integer wid){
+		if(jobService.getJob(id).getStatus().trim().toLowerCase().equals("taken")){
+			jobService.update("Finish", id);
+		}
+		return "redirect:/walker/" + wid;
+	}
+	
+	
+	
+}

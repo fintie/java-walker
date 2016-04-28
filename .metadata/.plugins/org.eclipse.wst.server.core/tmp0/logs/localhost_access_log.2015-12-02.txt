@@ -1,0 +1,9 @@
+127.0.0.1 - - [02/Dec/2015:09:40:56 +1100] "GET / HTTP/1.1" 404 951
+0:0:0:0:0:0:0:1 - - [02/Dec/2015:09:40:56 +1100] "GET /Walker/index.jsp HTTP/1.1" 200 630
+0:0:0:0:0:0:0:1 - - [02/Dec/2015:09:41:00 +1100] "GET /Walker/getWalker?username=yuvia&password=a HTTP/1.1" 200 569
+0:0:0:0:0:0:0:1 - - [02/Dec/2015:09:41:39 +1100] "POST /Walker/client/publish HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [02/Dec/2015:09:41:39 +1100] "GET /Walker/client/2 HTTP/1.1" 200 569
+0:0:0:0:0:0:0:1 - - [02/Dec/2015:09:42:02 +1100] "POST /Walker/client/publish HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [02/Dec/2015:09:42:02 +1100] "GET /Walker/client/2 HTTP/1.1" 200 569
+0:0:0:0:0:0:0:1 - - [02/Dec/2015:09:42:17 +1100] "POST /Walker/client/publish HTTP/1.1" 302 -
+0:0:0:0:0:0:0:1 - - [02/Dec/2015:09:42:17 +1100] "GET /Walker/client/2 HTTP/1.1" 200 569

@@ -1,0 +1,38 @@
+package walker.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import walker.entity.Walker;
+import walker.repository.WalkerRepository;
+
+@Service
+public class WalkerService {
+	
+	@Autowired
+	private WalkerRepository walkerRepository;
+	
+	@Transactional(readOnly=true)
+	public Walker getWalker(String userName, String password){
+		return walkerRepository.getByUsernameAndPassword(userName, password);
+	}
+	
+	@Transactional
+	public void save(Walker walker){
+		walkerRepository.save(walker);
+	}
+	
+	@Transactional(readOnly=true)
+	public Walker getWalker(Integer id){
+		return walkerRepository.findOne(id);
+	}
+	
+	@Transactional(readOnly=true)
+	public List<Walker> getAll(){
+		
+	}
+	
+}

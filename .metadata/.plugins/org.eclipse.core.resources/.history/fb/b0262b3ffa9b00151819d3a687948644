@@ -1,0 +1,13 @@
+package walker.repository;
+
+
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import walker.entity.Walker;
+
+public interface WalkerRepository extends JpaRepository<Walker, Integer>{
+	
+	Walker getByUsernameAndPassword(String userName, String password);
+	
+	
+}

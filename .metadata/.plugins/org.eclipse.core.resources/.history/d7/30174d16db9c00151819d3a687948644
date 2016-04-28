@@ -1,0 +1,45 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Admin Page</title>
+</head>
+<p>Hello ${walker.username}</p>
+<body>
+	<table border = "1" cellpadding="10" cellspacing="0">
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+				
+				<th>Description</th>
+				<th>CreateBy</th>
+				
+				<th>CreateTime</th>
+				<th>Status</th>
+				
+				<th>Accept</th>
+			</tr>
+		<c:forEach items="${jobs }" var="job">
+			<form action="${pageContext.request.contextPath }/admin/accept/${job.id}" method="POST">
+				<input type="hidden" name="wid" value="${walker.id }">
+				<tr>
+					<td>${job.id}</td>
+					<td>${job.name}</td>
+					<td>${job.description}</td>
+					<td>${job.createBy}</td>
+					<td>${job.createTime}</td>
+					<td>${job.status}</td>
+					<td>
+						<input type="submit" value="Accept">
+					</td>
+				</tr>
+			</form>
+		</c:forEach>
+	</table>
+</body>
+</html>

@@ -1,0 +1,198 @@
+package walker.test;
+
+
+import java.sql.SQLException;
+import java.util.List;
+
+import javax.sql.DataSource;
+
+import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import walker.entity.Job;
+import walker.entity.Walker;
+import walker.repository.JobRepository;
+import walker.repository.WalkerRepository;
+
+import java.util.*;
+
+import javax.mail.*;
+import javax.mail.internet.*;
+
+public class WalkerTest {
+
+	private ApplicationContext ctx = null;
+	private WalkerRepository walkerRepository;
+	private JobRepository jobRepository;
+	
+	{
+		ctx = new ClassPathXmlApplicationContext("applicationContext.xml");
+		walkerRepository = ctx.getBean(WalkerRepository.class);
+		jobRepository = ctx.getBean(JobRepository.class);
+	}
+	
+	@Test
+	public void testDataSource() throws SQLException {
+		DataSource dataSource = ctx.getBean(DataSource.class);
+		System.out.println(dataSource.getConnection());
+	}
+	
+	@Test 
+	public void testWalkerUserName(){
+		String userName = "william";
+		String password="Qing136641";
+		Walker walker = walkerRepository.getByUsernameAndPassword(userName, password);
+		System.out.println(walker.getEmail());
+	}
+	
+	@Test
+	public void testInsertData(){
+		Walker walker1 = new Walker();
+		Walker walker2 = new Walker();
+		Walker walker3 = new Walker();
+		walker1.setUsername("william");
+		walker1.setEmail("yibo.wei6@gmail.com");
+		walker1.setPassword("a");
+		walker1.setRole("Admin");
+		
+		walker2.setUsername("Yuvia");
+		walker2.setEmail("yibo.wei6@gmail.com");
+		walker2.setPassword("a");
+		walker2.setRole("Client");
+		
+		walker3.setUsername("Tom");
+		walker3.setEmail("948764415@qq.com");
+		walker3.setPassword("a");
+		walker3.setRole("Walker");
+		
+		walkerRepository.save(walker1);
+		walkerRepository.save(walker2);
+		walkerRepository.save(walker3);
+	}
+	
+	@Test
+	public void testNotFinish(){
+		Walker walker3 = walkerRepository.findOne(3);
+		System.out.println(walker3.getUsername());
+		
+		
+		List<Job> jobs = jobRepository.getAll("Pending");
+		System.out.println(jobs.size());
+		
+		
+		jobs = jobRepository.getNotFinish("Taken", walker3);
+		
+		System.out.println(jobs.size());
+	}
+	
+	@Test
+	public void testEmail(){
+		 final String username = "yibo.wei6@gmail.com";
+		 final String password = "weiyibo8810";
+		 Properties props = new Properties();
+	     props.put("mail.smtp.starttls.enable", "true");
+	     props.put("mail.smtp.auth", "true");
+	     props.put("mail.smtp.host", "smtp.gmail.com");
+	     props.put("mail.smtp.port", "587");
+	     Session session = Session.getInstance(props,
+				new javax.mail.Authenticator() {
+					protected javax.mail.PasswordAuthentication getPasswordAuthentication() {
+						return new javax.mail.PasswordAuthentication(username, password);
+					}
+				});
+		 try {
+
+	            Message message = new MimeMessage(session);
+	            message.setFrom(new InternetAddress("yibo.wei6@gmail.com"));
+	            message.setRecipients(Message.RecipientType.TO,
+	                InternetAddress.parse("948764415@qq.com"));
+	            message.setSubject("Testing Subject");
+	            message.setText("Dear Mail Crawler,"
+	                + "\n\n No spam to my email, please!");
+
+	            Transport.send(message);
+
+	            System.out.println("Done");
+
+	        } catch (MessagingException e) {
+	            throw new RuntimeException(e);
+	        }
+	}
+	
+	@Test
+	public void testEmail2(){
+		String to = "yibo.wei6@gmail.com";
+		 
+	      // 发件人电子邮箱
+	      String from = "yibo.wei6@gmail.com";
+	 
+	      // 指定发送邮件的主机为 localhost
+	      String host = "localhost";
+	 
+	      // 获取系统属性
+	      Properties properties = System.getProperties();
+	 
+	      // 设置邮件服务器
+	      properties.setProperty("mail.smtp.host", host);
+	 
+	      // 获取默认session对象
+	      Session session = Session.getDefaultInstance(properties);
+	 
+	      try{
+	         // 创建默认的 MimeMessage 对象
+	         MimeMessage message = new MimeMessage(session);
+	 
+	         // Set From: 头部头字段
+	         message.setFrom(new InternetAddress(from));
+	 
+	         // Set To: 头部头字段
+	         message.addRecipient(Message.RecipientType.TO,
+	                                  new InternetAddress(to));
+	 
+	         // Set Subject: 头部头字段
+	         message.setSubject("This is the Subject Line!");
+	 
+	         // 设置消息体
+	         message.setText("This is actual message");
+	 
+	         // 发送消息
+	         Transport.send(message);
+	         System.out.println("Sent message successfully....");
+	      }catch (MessagingException mex) {
+	         mex.printStackTrace();
+	      }
+	   }
+	
+	@Test
+	public void testEmail3(){
+		 Properties props = new Properties();  
+	        // 开启debug调试  
+	        props.setProperty("mail.debug", "true");  
+	        // 发送服务器需要身份验证  
+	        props.setProperty("mail.smtp.auth", "true");  
+	        // 设置邮件服务器主机名  
+	        props.setProperty("mail.host", "smtp.163.com");  
+	        // 发送邮件协议名称  
+	        props.setProperty("mail.transport.protocol", "smtp");  
+	          
+	        // 设置环境信息  
+	        Session session = Session.getInstance(props);  
+	          
+	        // 创建邮件对象  
+	        Message msg = new MimeMessage(session);  
+	        msg.setSubject("JavaMail测试");  
+	        // 设置邮件内容  
+	        msg.setText("这是一封由JavaMail发送的邮件！");  
+	        // 设置发件人  
+	        msg.setFrom(new InternetAddress("java_mail_001@163.com"));  
+	          
+	        Transport transport = session.getTransport();  
+	        // 连接邮件服务器  
+	        transport.connect("java_mail_001", "javamail");  
+	        // 发送邮件  
+	        transport.sendMessage(msg, new Address[] {new InternetAddress("java_mail_002@163.com")});  
+	        // 关闭连接  
+	        transport.close(); 
+	}
+}

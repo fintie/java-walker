@@ -1,0 +1,7 @@
+INDEX VERSION 1.126
+/Users/YiboWei/Desktop/JAVA_WorkPlace/walker/.metadata/.plugins/org.eclipse.jst.jsp.core/jspsearch/681642470.index
+/Walker/src
+/Users/YiboWei/Desktop/JAVA_WorkPlace/walker/.metadata/.plugins/org.eclipse.jst.jsp.core/jspsearch/2658045452.index
+/Walker/src
+/Users/YiboWei/Desktop/JAVA_WorkPlace/walker/.metadata/.plugins/org.eclipse.jst.jsp.core/jspsearch/1217344098.index
+/Walker/src
